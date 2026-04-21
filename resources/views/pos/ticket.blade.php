@@ -1,223 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #{{ $invoice->invoice_no }}</title>
+    <title>&nbsp;</title>
     <style>
         @page {
             margin: 0;
-            size: 80mm 200mm; /* Standard Thermal Receipt Size */
+            size: 80mm auto;
         }
+
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
+            font-size: 12px;
             line-height: 1.2;
             margin: 0;
-            padding: 20px 0;
-            background: #e5e7eb;
-            color: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .ticket-wrapper {
-            width: 75mm;
+            padding: 0;
             background: #fff;
-            padding: 10px 10px 30px 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            color: #000;
+        }
+
+        .ticket-wrapper {
+            width: 76mm;
+            background: #fff;
+            padding: 15px 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
         }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .font-bold { font-weight: bold; }
-        .dashed-line { border-top: 1px dashed #000; margin: 5px 0; }
-        .double-dashed { border-top: 3px double #000; margin: 5px 0; }
-        
-        .header { margin-bottom: 10px; }
-        .brand-name { font-size: 18px; font-weight: 900; margin-bottom: 2px; text-transform: uppercase; }
-        .header-info { font-size: 9px; margin-bottom: 2px; }
 
-        .meta-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px; }
-        
-        .items-header { display: grid; grid-template-columns: 15px 1fr 40px 30px 25px 50px; font-size: 9px; font-weight: bold; margin-bottom: 2px; }
-        .item-row { display: grid; grid-template-columns: 15px 1fr 40px 30px 25px 50px; font-size: 9px; margin-bottom: 4px; align-items: start; }
-        .item-row .desc { grid-column: 1 / span 6; font-weight: bold; margin-bottom: 1px; }
+        .text-center {
+            text-align: center;
+        }
 
-        .summary-section { margin-top: 10px; }
-        .summary-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; }
-        .summary-row.total { font-size: 13px; font-weight: bold; padding-top: 5px; margin-top: 5px; border-top: 1px solid #000; }
+        .text-right {
+            text-align: right;
+        }
 
-        .payment-section { margin-top: 10px; padding: 5px; border: 1px solid #000; }
-        
-        .fbr-section { margin-top: 20px; border-top: 2px solid #000; padding-top: 10px; }
-        .fbr-id { font-size: 14px; font-weight: 900; letter-spacing: 1px; margin: 5px 0; }
-        .qr-code { margin: 10px auto; display: block; }
-        
-        .footer { font-size: 9px; margin-top: 15px; }
+        .text-left {
+            text-align: left;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .dashed-line {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+
+        .header {
+            margin-bottom: 10px;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .header-info {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .meta-section {
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .items-table th {
+            border-bottom: 1px dashed #000;
+            padding: 5px 0;
+            text-align: right;
+        }
+
+        .items-table th:first-child {
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 2px 0;
+        }
+
+        .item-desc-row {
+            font-weight: bold;
+        }
+
+        .item-values-row td {
+            text-align: right;
+            padding-bottom: 2px;
+        }
+
+        .item-values-row td:first-child {
+            text-align: left;
+        }
+
+        .summary-section {
+            margin-top: 5px;
+            font-size: 11px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1px;
+        }
+
+        .summary-row.total-payable {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .payment-section {
+            margin-top: 10px;
+            border-top: 1px dashed #000;
+            padding-top: 8px;
+        }
+
+        .footer-notes {
+            font-size: 10px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .fbr-section {
+            margin-top: 20px;
+            border-top: 1px solid #000;
+            padding-top: 15px;
+        }
+
+        .fbr-invoice-label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .fbr-invoice-num {
+            font-size: 18px;
+            font-weight: 900;
+            margin: 5px 0 15px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .fbr-footer-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .fbr-logo {
+            width: 90px;
+        }
+
+        .qr-code {
+            width: 90px;
+            height: 90px;
+        }
+
+        .loyalty-section {
+            margin-top: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: left;
+        }
 
         @media print {
-            .no-print { display: none; }
-            body { padding: 0; background: #fff; display: block; text-align: center; }
-            .ticket-wrapper { box-shadow: none; margin: 0 auto; display: inline-block; text-align: left; padding-bottom: 0; }
+            .no-print {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+                background: #fff;
+            }
+
+            .ticket-wrapper {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
+
 <body>
-<div class="ticket-wrapper">
-    <div class="header text-center">
-        <div class="brand-name">The Crimpers</div>
-        <div class="header-info">hop no. 5, Sargodha Rd, inside Pearl City Plaza, Canal Block Shadman Town, Faisalabad</div>
-        <div class="header-info">Phone:  0300 7614788</div>
-        <div class="header-info">NTN: 4401860-3</div>
-    </div>
-
-    <div class="dashed-line"></div>
-
-    <div class="metadata">
-        <div class="meta-row">
-            <span>Invoice #: <span class="font-bold">{{ $invoice->invoice_no }}</span></span>
-            <span>POS No.: <span class="font-bold">{{ $invoice->fbrLog->payload['POSID'] ?? '135793' }}</span></span>
+    <div class="ticket-wrapper">
+        <!-- Header -->
+        <div class="header text-center">
+            <div class="brand-name">The Crimpers</div>
+            <div class="header-info">Shop no. 5, Sargodha Rd, inside Pearl City Plaza, Canal Block Shadman Town,
+                Faisalabad</div>
+            <div class="header-info">Phone: 0300 7614788</div>
+            <div class="header-info">NTN: 4401860-3 &nbsp; PNTN: 110044018603</div>
         </div>
-        <div class="meta-row">
-            <span>Cashier: <span class="font-bold">{{ strtoupper($invoice->user->name ?? 'ADMIN') }}</span></span>
-            <span>{{ $invoice->created_at->format('d/m/Y H:i:s') }}</span>
-        </div>
-        <div class="meta-row">
-            <span>Mode of Payment: <span class="font-bold">{{ strtoupper($invoice->payment_method) }}</span></span>
-        </div>
-        <div class="meta-row">
-            <span>Customer: <span class="font-bold">{{ strtoupper($invoice->customer_name ?: ($invoice->customer->name ?? 'WALK-IN CUSTOMER')) }}</span></span>
-        </div>
-        @if($invoice->remarks)
-        <div class="meta-row">
-            <span>Remarks: {{ $invoice->remarks }}</span>
-        </div>
-        @endif
-    </div>
 
-    <div class="dashed-line"></div>
-
-    <div class="items-header">
-        <span>#</span>
-        <span>Description</span>
-        <span class="text-right">Price</span>
-        <span class="text-right">GST</span>
-        <span class="text-right">Qty</span>
-        <span class="text-right">Total</span>
-    </div>
-
-    <div class="dashed-line"></div>
-
-    @foreach($invoice->items as $index => $item)
-    <div class="item-row">
-        <div class="desc">{{ $item->itemizable->name ?? 'Service' }}</div>
-        <span>{{ $index + 1 }}</span>
-        <span></span> <!-- Placeholder for desc line 2 -->
-        <span class="text-right">{{ number_format($item->price, 2) }}</span>
-        <span class="text-right">{{ number_format($item->subtotal * 0.05, 2) }}</span>
-        <span class="text-right font-bold">{{ $item->quantity }}</span>
-        <span class="text-right">{{ number_format($item->subtotal + ($item->subtotal * 0.05), 2) }}</span>
-    </div>
-    @endforeach
-
-    <div class="dashed-line"></div>
-
-    <div class="summary-section">
-        <div class="summary-row">
-            <span>Total Qty: {{ $invoice->items->sum('quantity') }}</span>
-            <span class="font-bold text-right">Total Amount: {{ number_format($invoice->total_amount, 2) }}</span>
-        </div>
-        <div class="summary-row">
-            <span></span>
-            <span class="text-right">Discount: {{ number_format($invoice->discount, 2) }}</span>
-        </div>
-        <div class="summary-row">
-            <span>Total GST (5%): {{ number_format($invoice->tax, 2) }}</span>
-            <span class="text-right">POS Service Fee: 1.00</span>
-        </div>
-        <div class="summary-row total">
-            <span>Payable:</span>
-            <span class="text-right">{{ number_format($invoice->payable_amount, 2) }}</span>
-        </div>
-    </div>
-
-    <div class="dashed-line"></div>
-
-    <div class="payment-section">
-        @php
-            $tendered = $invoice->tendered_amount ?? $invoice->payable_amount;
-            $balance = max(0, $tendered - $invoice->payable_amount);
-        @endphp
-        <div class="summary-row">
-            <span class="font-bold">Cash Tendered:</span>
-            <span class="text-right font-bold">{{ number_format($tendered, 2) }}</span>
-        </div>
-        <div class="summary-row">
-            <span class="font-bold">Amount Charged:</span>
-            <span class="text-right font-bold">{{ number_format($invoice->payable_amount, 2) }}</span>
-        </div>
-        <div class="summary-row">
-            <span class="font-bold">Balance:</span>
-            <span class="text-right font-bold">{{ number_format($balance, 2) }}</span>
-        </div>
-    </div>
-
-    <div class="footer text-center">
-        <p>Thanks For Visiting.</p>
-        {{-- <p>No Return No Exchange For Services</p> --}}
-        <p>For Complaint & Queries:  0300 7614788</p>
-        <p style="font-size: 8px;">(Software developed by BROSHTech - no 0317 7676560)</p>
-    </div>
-
-    <div class="fbr-section text-center">
-        @if($invoice->fbrLog && $invoice->fbrLog->status === 'success')
-            <div class="font-bold" style="font-size: 12px;">FBR Invoice #:</div>
-            <div class="fbr-id" style="font-size: 10px; word-break: break-all;">
-                {{ $invoice->fbrLog->response['InvoiceNumber'] ?? '---' }}
+        <!-- Metadata -->
+        <div class="meta-section" style="font-size: 9px; white-space: nowrap;">
+            <div class="meta-row">
+                <span>Invoice #: <strong>{{ $invoice->invoice_no }}</strong></span>
             </div>
-            
-            @if(isset($invoice->fbrLog->response['InvoiceNumber']))
-                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($invoice->fbrLog->response['InvoiceNumber']) }}" alt="FBR QR" width="140" height="140">
+            <div class="meta-row" style="margin-bottom: 5px;">
+                <span>Cashier: {{ strtoupper($invoice->user->name ?? 'ADMIN') }}</span>
+                <span>{{ $invoice->created_at->format('d/m/Y h:i:s A') }}</span>
+            </div>
+            <div class="meta-row">
+                <span>Mode of Payment: {{ strtoupper($invoice->payment_method) }}</span>
+            </div>
+            <div class="meta-row">
+                <span>Customer:
+                    {{ strtoupper($invoice->customer_name ?: ($invoice->customer->name ?? 'CASH SALES-WALKING CUSTOMER A/C')) }}</span>
+            </div>
+            @if($invoice->remarks)
+                <div class="meta-row">
+                    <span>Remarks: {{ $invoice->remarks }}</span>
+                </div>
             @endif
-            
-            <div style="margin-top: 10px;">
-                <img src="https://fbr.gov.pk/fbr-logo.png" alt="FBR POS" style="width: 80px; filter: grayscale(1);">
-                <div class="font-bold" style="font-size: 10px; margin-top: 5px;">FBR POS INVOICED</div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table" style="font-size: 10px;">
+            <thead>
+                <tr>
+                    <th style="width: 10px; text-align: left;">#</th>
+                    <th style="text-align: left;">Description</th>
+                    <th>Price</th>
+                    <th>GST Rate</th>
+                    <th>Qty</th>
+                    <th>GST</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($invoice->items as $index => $item)
+                    <tr class="item-desc-row">
+                        <td>{{ $index + 1 }}</td>
+                        <td colspan="6" style="text-transform: uppercase;">{{ $item->itemizable->name ?? 'Product Item' }}</td>
+                    </tr>
+                    <tr class="item-values-row">
+                        <td colspan="2"></td>
+                        <td>{{ number_format($item->price, 2) }}</td>
+                        <td>{{ number_format($item->tax_rate ?? 5, 2) }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ number_format($item->tax, 2) }}</td>
+                        <td>{{ number_format($item->total, 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div class="dashed-line"></div>
+
+        <!-- Summary Section -->
+        <div style="margin-top: 3px; font-size: 11px; line-height: 1.1;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <span style="font-size: 10px;">Total Qty: {{ $invoice->items->sum('quantity') }}</span>
+                <div style="display: flex; gap: 8px;">
+                    <span class="font-bold" style="font-size: 12px;">Total Amount:</span>
+                    <span style="min-width: 70px; text-align: right; font-size: 12px; font-weight: bold;">{{ number_format($invoice->total_amount, 2) }}</span>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: baseline; margin-bottom: 2px;">
+                <div style="display: flex; gap: 8px;">
+                    <span>Discount:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->discount, 2) }}</span>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <span style="font-size: 10px;">GST: {{ number_format($invoice->tax, 2) }}</span>
+                <div style="display: flex; gap: 8px;">
+                    <span>POS Service Fee:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->service_fee ?? 1.00, 2) }}</span>
+                </div>
             </div>
             
-            <p style="font-size: 9px; margin-top: 10px; color: #000; font-weight: bold;">
-                Verified by FBR TaxAsaan
+            <div style="display: flex; justify-content: flex-end;">
+                <div style="width: 150px; border-top: 1px solid #000; margin: 2px 0;"></div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; font-size: 14px; font-weight: bold; margin-bottom: 2px;">
+                <div style="display: flex; gap: 8px;">
+                    <span>Payable:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->payable_amount, 2) }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <div style="width: 160px; border-top: 1px dashed #000; margin: 4px 0;"></div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end; font-weight: bold; font-size: 12px; line-height: 1.2;">
+                <div style="display: flex; gap: 8px; margin-bottom: 1px;">
+                    <span>Cash Tendered:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->received_amount ?? $invoice->payable_amount, 2) }}</span>
+                </div>
+                <div style="display: flex; gap: 8px; font-weight: normal; font-size: 11px; margin-bottom: 1px;">
+                    <span>Amount Charged:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->payable_amount, 2) }}</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <span>Balance:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->change_amount ?? 0, 2) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Notes -->
+        <div class="footer-notes text-center">
+            <div class="footer-note" style="margin-top: 15px; text-align: left; font-size: 9px; line-height: 1.2;">
+                <div>Thanks For Visiting</div>
+                <div>For Complaint & Queries 0300 7614788</div>
+                <div style="font-size: 8px; margin-top: 2px;">(Software developed by BROSHTech - no 0317 7676560)</div>
+            </div>
+        </div>
+
+        <!-- FBR Section -->
+        <div class="fbr-section text-center">
+            <div style="margin-top: 20px; border-top: 1px solid #000; padding-top: 10px;">
+                <div style="font-size: 11px;">FBR Invoice #:</div>
+                <div style="font-size: 14px; font-weight: bold; margin-top: 3px;">
+                    {{ $invoice->fbrLog->response['InvoiceNumber'] ?? '819568FDOO57331977*test*' }}
+                </div>
+            </div>
+
+            <div class="fbr-footer-layout">
+                <div class="text-left">
+                    <img src="{{ asset('img/fbr-pos-logo.png') }}" alt="FBR POS Logo" class="fbr-logo"
+                        style="filter: grayscale(1) invert(1) contrast(1.5);">
+                    <div
+                        style="font-size: 8px; font-weight: 900; text-align: center; margin-top: -2px; letter-spacing: 0.3px;">
+                        INVOICING SYSTEM</div>
+                </div>
+
+                @php
+                    $qrData = $invoice->fbrLog->response['InvoiceNumber'] ?? '135793260415135718887';
+                @endphp
+                <img class="qr-code"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrData) }}"
+                    alt="FBR QR">
+            </div>
+
+            <p style="font-size: 9px; margin-top: 15px; font-weight: bold;">
+                Verify this invoice through FBR TaxAsaan Mobile App or<br>
             </p>
-        @else
-            <div style="border: 1px solid #000; padding: 10px; margin: 10px 0;">
-                <div class="font-bold" style="font-size: 14px; color: #000;">FBR SYNC PENDING</div>
-                <div style="font-size: 10px; margin-top: 5px;">This invoice will be synced once offline issues are resolved.</div>
-            </div>
-        @endif
-        
-        <p style="font-size: 8px; margin-top: 10px;">
-            Verify this invoice through FBR TaxAsaan Mobile App or<br>
-            SMS at 9966 and win exciting prizes in lottery.
-        </p>
+        </div>
+
+        <div class="no-print text-center" style="margin-top: 20px;">
+            <button onclick="window.print()"
+                style="background:#000; color:#fff; padding:10px 20px; border:none; cursor:pointer; font-weight:bold; margin-bottom: 5px; border-radius: 4px;">PRINT
+                RECEIPT</button>
+            <button onclick="window.close()"
+                style="background:#ef4444; color:#fff; padding:10px 20px; border:none; cursor:pointer; font-weight:bold; border-radius: 4px;">CLOSE</button>
+            <br><br>
+            <a href="{{ route('pos.index') }}" style="color:#666; font-size:11px; text-decoration:none;">&larr; Back to
+                POS</a>
+        </div>
     </div>
 
-    <div class="no-print text-center" style="margin-top: 20px;">
-        <button onclick="window.print()" style="background:#000; color:#fff; padding:10px 20px; border:none; cursor:pointer; font-weight:bold; margin-bottom: 5px;">PRINT THERMAL RECEIPT</button>
-        <button onclick="window.close()" style="background:#ef4444; color:#fff; padding:10px 20px; border:none; cursor:pointer; font-weight:bold;">CLOSE WINDOW</button>
-        <br><br>
-        <a href="{{ route('pos.index') }}" style="color:#666; font-size:10px; text-decoration:none;">Back to POS</a>
-    </div>
-</div>
-
-<script>
-    // Automatically trigger the browser print dialog when the receipt renders
-    window.onload = function() {
-        setTimeout(() => {
-            window.print();
-        }, 500); // Slight delay ensures styles and QR codes are fully painted
-    };
-</script>
+    <script>
+        window.onload = function () {
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        };
+    </script>
 </body>
-</html>
 
+</html>

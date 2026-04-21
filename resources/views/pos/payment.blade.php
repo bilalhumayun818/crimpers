@@ -83,7 +83,7 @@ body{font-family:'Outfit',sans-serif}
           <div class="methods">
             <button class="m-btn active" data-method="cash" onclick="setPayment('cash')"><i data-lucide="banknote"></i><span>Cash</span></button>
             <button class="m-btn" data-method="card" onclick="setPayment('card')"><i data-lucide="credit-card"></i><span>Card</span></button>
-            <button class="m-btn" data-method="bank" onclick="setPayment('bank')"><i data-lucide="landmark"></i><span>Bank</span></button>
+            <!-- <button class="m-btn" data-method="bank" onclick="setPayment('bank')"><i data-lucide="landmark"></i><span>Bank</span></button> -->
             <button class="m-btn" data-method="split" onclick="setPayment('split')"><i data-lucide="arrow-left-right"></i><span>Split</span></button>
           </div>
         </div>
