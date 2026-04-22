@@ -17,7 +17,7 @@ class InvoiceController extends Controller
         // Apply date range filter
         if ($request->filled('date_from') && $request->filled('date_to')) {
             $query->whereDate('created_at', '>=', $request->date_from)
-                  ->whereDate('created_at', '<=', $request->date_to);
+                ->whereDate('created_at', '<=', $request->date_to);
         }
 
         // Apply period filter
@@ -43,11 +43,11 @@ class InvoiceController extends Controller
                     break;
                 case 'this_month':
                     $query->whereMonth('created_at', Carbon::now()->month)
-                          ->whereYear('created_at', Carbon::now()->year);
+                        ->whereYear('created_at', Carbon::now()->year);
                     break;
                 case 'last_month':
                     $query->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                          ->whereYear('created_at', Carbon::now()->subMonth()->year);
+                        ->whereYear('created_at', Carbon::now()->subMonth()->year);
                     break;
                 case 'this_year':
                     $query->whereYear('created_at', Carbon::now()->year);
@@ -72,13 +72,13 @@ class InvoiceController extends Controller
         if ($request->filled('search')) {
             $searchTerm = trim((string) $request->search);
             $invoiceSearch = ltrim($searchTerm, '#');
-            
+
             $query->where(function ($q) use ($searchTerm, $invoiceSearch) {
                 $q->where('invoice_no', 'like', '%' . $invoiceSearch . '%')
-                  ->orWhere('customer_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('customer', function ($cq) use ($searchTerm) {
-                      $cq->where('name', 'like', '%' . $searchTerm . '%');
-                  });
+                    ->orWhere('customer_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('customer', function ($cq) use ($searchTerm) {
+                        $cq->where('name', 'like', '%' . $searchTerm . '%');
+                    });
             });
         }
 
@@ -120,11 +120,11 @@ class InvoiceController extends Controller
                     break;
                 case 'this_month':
                     $periodQuery->whereMonth('created_at', Carbon::now()->month)
-                               ->whereYear('created_at', Carbon::now()->year);
+                        ->whereYear('created_at', Carbon::now()->year);
                     break;
                 case 'last_month':
                     $periodQuery->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                               ->whereYear('created_at', Carbon::now()->subMonth()->year);
+                        ->whereYear('created_at', Carbon::now()->subMonth()->year);
                     break;
                 case 'this_year':
                     $periodQuery->whereYear('created_at', Carbon::now()->year);
@@ -142,16 +142,21 @@ class InvoiceController extends Controller
         return view('invoices.index', compact('invoices', 'totalSales', 'totalInvoices', 'periodInvoices'));
     }
 
+    /**
+     * USER DEMAND: "make pagee for that view page where it show sales history propelry"
+     * Redirecting all review actions to the new 'history-detail' administrative page.
+     * Thermal ticket logic (pos.ticket) is no longer utilized for viewing.
+     */
     public function show(Invoice $invoice)
     {
-        $invoice->load(['items.itemizable', 'fbrLog']);
-        return view('pos.ticket', compact('invoice'));
+        $invoice->load(['items.itemizable', 'fbrLog', 'customer', 'user']);
+        return view('invoices.history-detail', compact('invoice'));
     }
 
     public function historyShow(Invoice $invoice)
     {
         $invoice->load(['items.itemizable', 'fbrLog', 'customer', 'user']);
-        return view('invoices.show', compact('invoice'));
+        return view('invoices.history-detail', compact('invoice'));
     }
 
     public function export(Request $request)
@@ -161,7 +166,7 @@ class InvoiceController extends Controller
         // Apply same filters as index method
         if ($request->filled('date_from') && $request->filled('date_to')) {
             $query->whereDate('created_at', '>=', $request->date_from)
-                  ->whereDate('created_at', '<=', $request->date_to);
+                ->whereDate('created_at', '<=', $request->date_to);
         }
 
         // Apply period filter
@@ -187,11 +192,11 @@ class InvoiceController extends Controller
                     break;
                 case 'this_month':
                     $query->whereMonth('created_at', Carbon::now()->month)
-                          ->whereYear('created_at', Carbon::now()->year);
+                        ->whereYear('created_at', Carbon::now()->year);
                     break;
                 case 'last_month':
                     $query->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                          ->whereYear('created_at', Carbon::now()->subMonth()->year);
+                        ->whereYear('created_at', Carbon::now()->subMonth()->year);
                     break;
                 case 'this_year':
                     $query->whereYear('created_at', Carbon::now()->year);
@@ -216,13 +221,13 @@ class InvoiceController extends Controller
         if ($request->filled('search')) {
             $searchTerm = trim((string) $request->search);
             $invoiceSearch = ltrim($searchTerm, '#');
-            
+
             $query->where(function ($q) use ($searchTerm, $invoiceSearch) {
                 $q->where('invoice_no', 'like', '%' . $invoiceSearch . '%')
-                  ->orWhere('customer_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('customer', function ($cq) use ($searchTerm) {
-                      $cq->where('name', 'like', '%' . $searchTerm . '%');
-                  });
+                    ->orWhere('customer_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('customer', function ($cq) use ($searchTerm) {
+                        $cq->where('name', 'like', '%' . $searchTerm . '%');
+                    });
             });
         }
 
@@ -249,7 +254,7 @@ class InvoiceController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function() use ($invoices) {
+        $callback = function () use ($invoices) {
             $file = fopen('php://output', 'w');
 
             // CSV headers

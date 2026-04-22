@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('page-title', 'Sale History')
 @section('page-sub', 'Filter and browse all transactions.')
@@ -296,13 +296,11 @@
                             @endif
                         </td>
                         <td>
+                            {{-- USER DEMAND: "No ticket logic" - Removing print button and thermal ticket references --}}
                             <div class="row-actions">
-                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" title="View details">
-                                    View
+                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" style="width:100%; justify-content:center; background:#111827; color:#fff;" title="View professional history">
+                                    <i data-lucide="eye" style="width:14px; height:14px; margin-right:6px;"></i> View History
                                 </a>
-                                <button class="row-btn print" title="Print Invoice" onclick="window.open('{{ route('invoices.show', $invoice) }}','_blank')">
-                                    Print
-                                </button>
                             </div>
                         </td>
                     </tr>
