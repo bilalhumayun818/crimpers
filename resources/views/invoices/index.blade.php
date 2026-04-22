@@ -296,10 +296,9 @@
                             @endif
                         </td>
                         <td>
-                            {{-- USER DEMAND: "No ticket logic" - Removing print button and thermal ticket references --}}
                             <div class="row-actions">
-                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" style="width:100%; justify-content:center; background:#111827; color:#fff;" title="View professional history">
-                                    <i data-lucide="eye" style="width:14px; height:14px; margin-right:6px;"></i> View History
+                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" title="View History">
+                                    View History
                                 </a>
                             </div>
                         </td>

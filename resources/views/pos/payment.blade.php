@@ -512,18 +512,11 @@
         const iframe = document.getElementById('receipt-iframe');
         if (iframe) {
           iframe.onload = function () {
-            // Force the print dialog to open for the receipt
-            try {
-              iframe.contentWindow.focus();
-              iframe.contentWindow.print();
-            } catch (e) {
-              console.log('Print trigger error:', e);
-            }
-            
-            // Give the browser time to open the print dialog before redirecting
+            // ticket.blade.php auto-triggers window.print() on its own onload.
+            // We just wait, then redirect back to POS.
             setTimeout(() => {
               window.location.href = '{{ route("pos.index") }}';
-            }, 3000);
+            }, 4000);
           };
           iframe.src = `/invoices/${data.invoice.id}/ticket`;
         } else {
