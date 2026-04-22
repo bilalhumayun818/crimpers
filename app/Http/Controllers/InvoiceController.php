@@ -159,6 +159,15 @@ class InvoiceController extends Controller
         return view('invoices.history-detail', compact('invoice'));
     }
 
+    /**
+     * Returns the thermal receipt (pos.ticket) for printing via POS payment page iframe.
+     */
+    public function ticket(Invoice $invoice)
+    {
+        $invoice->load(['items.itemizable', 'fbrLog', 'customer', 'user']);
+        return view('pos.ticket', compact('invoice'));
+    }
+
     public function export(Request $request)
     {
         $query = Invoice::with(['customer', 'user']);

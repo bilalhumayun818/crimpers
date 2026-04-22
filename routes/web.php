@@ -67,6 +67,7 @@ Route::middleware(['web', 'auth', 'session.active', '2fa.verified'])->group(func
     // Invoice Management
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/export', [InvoiceController::class, 'export'])->name('invoices.export');
+    Route::get('/invoices/{invoice}/ticket', [InvoiceController::class, 'ticket'])->name('invoices.ticket');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/sales-history/{invoice}', [InvoiceController::class, 'historyShow'])->name('sales-history.show');
 

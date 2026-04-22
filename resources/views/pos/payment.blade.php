@@ -356,7 +356,9 @@
           <button id="checkout-btn" class="checkout-btn" onclick="checkout()">PROCEED TO CHECKOUT</button>
           <button id="done-btn" class="checkout-btn" style="display:none; background:#16a34a; color:#fff;"
             onclick="window.location.href='{{ route('pos.index') }}'">DONE & BACK TO POS</button>
-            {{-- USER DEMAND: Hidden iframe for auto-printing removed. --}}
+          
+          <!-- Hidden iframe for instant auto-printing -->
+          <iframe id="receipt-iframe" style="position: absolute; width: 0; height: 0; border: none; visibility: hidden;"></iframe>
         </div>
       </div>
     </div>
@@ -464,14 +466,14 @@
         const splitCash = parseFloat(document.getElementById('split-cash').value) || 0;
         const splitCard = parseFloat(document.getElementById('split-card').value) || 0;
         if (splitCash + splitCard < total - 0.01) {
-          showAppMessage('Split amounts must cover total.', 'error');
+          alert('Split amounts must cover total.');
           return;
         }
       }
       if (paymentMethod === 'cash') {
         const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
         if (tendered < total - 0.01) {
-          showAppMessage('Insufficient cash tendered.', 'error');
+          alert('Insufficient cash tendered.');
           return;
         }
       }
@@ -507,21 +509,32 @@
         btn.style.display = 'none';
         document.getElementById('done-btn').style.display = 'block';
 
-        // Hook auto-redirection into the print process
         const iframe = document.getElementById('receipt-iframe');
-        iframe.onload = function () {
-          // The browser's print dialog will naturally freeze this timer. 
-          // Once the cashier completes the print, the timer finishes and auto-routes back!
+        if (iframe) {
+          iframe.onload = function () {
+            // Force the print dialog to open for the receipt
+            try {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+            } catch (e) {
+              console.log('Print trigger error:', e);
+            }
+            
+            // Give the browser time to open the print dialog before redirecting
+            setTimeout(() => {
+              window.location.href = '{{ route("pos.index") }}';
+            }, 3000);
+          };
+          iframe.src = `/invoices/${data.invoice.id}/ticket`;
+        } else {
+          // Fallback if iframe is missing
           setTimeout(() => {
             window.location.href = '{{ route("pos.index") }}';
-          }, 1500);
-        };
-
-        // Auto-Print the thermal receipt invisibly on this exact screen
-        iframe.src = `/invoices/${data.invoice.id}`;
+          }, 3000);
+        }
 
       } catch (e) {
-        showAppMessage(e.message || 'Something went wrong.', 'error');
+        alert(e.message || 'Something went wrong.');
         btn.disabled = false;
         btn.innerText = 'PROCEED TO CHECKOUT';
       }

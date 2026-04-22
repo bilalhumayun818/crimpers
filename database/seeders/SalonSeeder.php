@@ -17,8 +17,8 @@ class SalonSeeder extends Seeder
     {
         // Create Admin User
         User::create([
-            'name' => 'Sajid',
-            'email' => 'Sa40560@gmail.com',
+            'name' => 'Safiullah',
+            'email' => 'admin@starline.com',
             'password' => Hash::make('password'),
             'role' => 'admin'
         ]);
