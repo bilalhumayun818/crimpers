@@ -101,3 +101,18 @@ Route::middleware(['web', 'auth', 'session.active', '2fa.verified'])->group(func
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+// Port test for FBR integration (Public for debugging)
+Route::get('/test-fbr-port', function() {
+    $host = 'esp.fbr.gov.pk';
+    $port = 8244;
+    
+    $connection = @fsockopen($host, $port, $errno, $errstr, 5);
+    
+    if ($connection) {
+        fclose($connection);
+        return "✅ Port 8244 is OPEN - FBR connection works!";
+    } else {
+        return "❌ Port 8244 is BLOCKED - Error: $errstr (Code: $errno)";
+    }
+});

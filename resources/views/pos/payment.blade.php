@@ -466,14 +466,14 @@
         const splitCash = parseFloat(document.getElementById('split-cash').value) || 0;
         const splitCard = parseFloat(document.getElementById('split-card').value) || 0;
         if (splitCash + splitCard < total - 0.01) {
-          alert('Split amounts must cover total.');
+          showAppMessage('Split amounts must cover the total amount.', 'error');
           return;
         }
       }
       if (paymentMethod === 'cash') {
         const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
         if (tendered < total - 0.01) {
-          alert('Insufficient cash tendered.');
+          showAppMessage('Insufficient cash tendered.', 'error');
           return;
         }
       }
@@ -527,7 +527,8 @@
         }
 
       } catch (e) {
-        alert(e.message || 'Something went wrong.');
+        console.error('Checkout error:', e);
+        showAppMessage(e.message || 'Something went wrong during checkout.', 'error');
         btn.disabled = false;
         btn.innerText = 'PROCEED TO CHECKOUT';
       }

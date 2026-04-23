@@ -237,7 +237,11 @@ class POSController extends Controller
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred during checkout: ' . $e->getMessage()
+                'message' => 'Checkout Failed: ' . $e->getMessage(),
+                'debug' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]
             ], 500);
         }
     }
