@@ -1269,7 +1269,7 @@
         {{-- Pinned checkout button --}}
         <div class="order-checkout-pin">
           <button onclick="goToPayment()" id="checkout-btn" class="checkout-btn" disabled>
-            PROCEED TO PAYMENT
+            PROCEED
           </button>
         </div>
 

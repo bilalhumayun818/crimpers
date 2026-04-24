@@ -38,12 +38,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('web')->group(function () {
-    Route::get('/two-factor-challenge', [LoginController::class, 'showTwoFactorForm'])->name('auth.2fa.form');
-    Route::post('/two-factor-challenge', [LoginController::class, 'verifyTwoFactor'])->name('auth.2fa.verify');
     Route::get('/session-expired', [LoginController::class, 'sessionExpired'])->name('session.expired');
 });
 
-Route::middleware(['web', 'auth', 'session.active', '2fa.verified'])->group(function () {
+Route::middleware(['web', 'auth', 'session.active'])->group(function () {
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
     Route::get('/pos/payment', [POSController::class, 'payment'])->name('pos.payment');
     Route::get('/pos/check-coupon', [POSController::class, 'checkCoupon'])->name('pos.check-coupon');
@@ -103,12 +101,12 @@ Route::middleware(['web', 'auth', 'session.active', '2fa.verified'])->group(func
 });
 
 // Port test for FBR integration (Public for debugging)
-Route::get('/test-fbr-port', function() {
+Route::get('/test-fbr-port', function () {
     $host = 'esp.fbr.gov.pk';
     $port = 8244;
-    
+
     $connection = @fsockopen($host, $port, $errno, $errstr, 5);
-    
+
     if ($connection) {
         fclose($connection);
         return "✅ Port 8244 is OPEN - FBR connection works!";

@@ -68,7 +68,7 @@ class POSController extends Controller
 
                 foreach ($request->items as $item) {
                     $subtotal = $item['subtotal'] ?? ($item['price'] * $item['quantity']);
-                    
+
                     InvoiceItem::create([
                         'invoice_id' => $invoice->id,
                         'itemizable_id' => $item['id'],
@@ -110,7 +110,7 @@ class POSController extends Controller
                 $totalTax = $request->tax ?? 0;
                 $totalItems = count($request->items);
                 $taxPerItem = $totalItems > 0 ? round($totalTax / $totalItems, 2) : 0;
-                
+
                 $buyerName = $request->customer_name;
                 if (!$buyerName && $request->customer_id) {
                     $customer = Customer::find($request->customer_id);
@@ -126,39 +126,39 @@ class POSController extends Controller
                 $buyerPhone = $buyerPhone ?: '0000-0000000';
 
                 $posServiceFee = 1.00; // Fixed FBR POS Service Fee
-                $finalPayable = (float)$request->payable_amount + $posServiceFee;
+                $finalPayable = (float) $request->payable_amount + $posServiceFee;
 
                 $fbrPayload = [
                     'InvoiceNumber' => $invoice->invoice_no,
-                    'POSID' => (int)env('FBR_POS_ID', 819568),
+                    'POSID' => (int) env('FBR_POS_ID', 819568),
                     'USIN' => 'USIN-' . strtoupper(Str::random(10)),
                     'DateTime' => now()->format('Y-m-d H:i:s'),
                     'BuyerName' => $buyerName,
                     'BuyerPhoneNumber' => $buyerPhone,
                     'BuyerNTN' => "",
                     'TotalBillAmount' => round($finalPayable, 2),
-                    'TotalQuantity' => round((float)collect($request->items)->sum('quantity'), 2),
-                    'TotalSaleValue' => round((float)$request->total_amount, 2),
-                    'TotalTaxCharged' => round((float)$totalTax, 2),
-                    'Discount' => round((float)($request->discount ?? 0.0), 2),
+                    'TotalQuantity' => round((float) collect($request->items)->sum('quantity'), 2),
+                    'TotalSaleValue' => round((float) $request->total_amount, 2),
+                    'TotalTaxCharged' => round((float) $totalTax, 2),
+                    'Discount' => round((float) ($request->discount ?? 0.0), 2),
                     'FurtherTax' => round($posServiceFee, 2),
                     'PaymentMode' => $request->payment_method == 'cash' ? 1 : 2, // 1: Cash, 2: Card
                     'InvoiceType' => 1, // 1: Standard, 2: Return
-                    'items' => collect($request->items)->map(function($item) use ($taxPerItem) {
-                        $price = (float)($item['price'] ?? 0.0);
-                        $quantity = (float)($item['quantity'] ?? 0.0);
-                        $subtotal = (float)($item['subtotal'] ?? ($price * $quantity));
-                        
+                    'items' => collect($request->items)->map(function ($item) use ($taxPerItem) {
+                        $price = (float) ($item['price'] ?? 0.0);
+                        $quantity = (float) ($item['quantity'] ?? 0.0);
+                        $subtotal = (float) ($item['subtotal'] ?? ($price * $quantity));
+
                         return [
-                            'ItemCode' => (string)$item['id'],
+                            'ItemCode' => (string) $item['id'],
                             'ItemName' => $item['name'] ?? 'Unknown Item',
                             'Quantity' => round($quantity, 2),
                             'PCTCode' => "11001010", // Services class code
                             'TaxRate' => 5.0, // Fixed strictly to 5% GST on all products/services
                             'SaleValue' => round($price, 2),
                             'Discount' => 0.0,
-                            'TaxCharged' => round((float)$taxPerItem, 2),
-                            'TotalAmount' => round((float)($subtotal + $taxPerItem), 2),
+                            'TaxCharged' => round((float) $taxPerItem, 2),
+                            'TotalAmount' => round((float) ($subtotal + $taxPerItem), 2),
                             'FurtherTax' => 0.0,
                             'InvoiceType' => 1,
                             'RefUSIN' => null
@@ -189,13 +189,13 @@ class POSController extends Controller
                         'Response' => $resData['Response'] ?? 'FBR API Request Failed',
                         'InvoiceNumber' => $invoice->invoice_no,
                         'FBRInvoiceNumber' => $resData['InvoiceNumber'] ?? null,
-                        'QRCode' => isset($resData['InvoiceNumber']) 
+                        'QRCode' => isset($resData['InvoiceNumber'])
                             ? "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($resData['InvoiceNumber'])
                             : null,
                     ];
                 } catch (\Exception $apiEx) {
                     Log::error('FBR API Connection Error: ' . $apiEx->getMessage());
-                    
+
                     $apiResponse = [
                         'Code' => 'ERR',
                         'Response' => 'Could not connect to FBR API',
@@ -216,10 +216,10 @@ class POSController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Invoice #' . $invoice->invoice_no . ' generated. ' . 
-                                ($apiResponse['Code'] == '100' 
-                                    ? 'FBR SYNCED: ' . $apiResponse['FBRInvoiceNumber'] 
-                                    : 'FBR FAILED: ' . $apiResponse['Response']),
+                    'message' => 'Invoice #' . $invoice->invoice_no . ' generated. ' .
+                        ($apiResponse['Code'] == '100'
+                            ? 'FBR SYNCED: ' . $apiResponse['FBRInvoiceNumber']
+                            : 'FBR FAILED: ' . $apiResponse['Response']),
                     'invoice' => $invoice->load('items.itemizable'),
                     'fbr' => $apiResponse
                 ]);
@@ -284,7 +284,7 @@ class POSController extends Controller
     {
         $code = $request->input('code');
         $totalAmount = $request->input('total_amount', 0);
-        
+
         $coupon = Coupon::where('code', $code)->first();
 
         if (!$coupon) {
@@ -309,7 +309,7 @@ class POSController extends Controller
     public function searchCustomer(Request $request)
     {
         $q = $request->input('q');
-        
+
         if (empty($q)) {
             return response()->json(['success' => false, 'message' => 'Query is empty']);
         }

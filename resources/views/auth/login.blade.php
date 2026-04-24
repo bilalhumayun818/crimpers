@@ -3,139 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — {{ config('app.name', 'The Crimpers') }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Login — The Crimpers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{min-height:100vh;display:flex;font-family:'Outfit',sans-serif;background:#f1f5f9}
+        :root{--y1:#F7DF79;--y2:#FBEFBC;--yd:#c9a800;--yk:#a07800;--ybg:#fffdf0;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif;}
 
-        /* Left panel */
-        .left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:#fff;min-height:100vh}
-        .login-box{width:100%;max-width:400px}
+        body{
+            min-height:100vh;
+            display:flex;
+            background:#0f0f0f;
+            overflow:hidden;
+        }
 
-        /* Logo */
-        .logo{display:flex;align-items:center;gap:10px;margin-bottom:40px}
-        .logo-mark{width:42px;height:42px;background:#111827;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .logo-mark svg{width:22px;height:22px;color:#F7DF79}
-        .logo-name{font-size:20px;font-weight:900;color:#111827}
-        .logo-sub{font-size:11px;color:#9ca3af;font-weight:500;margin-top:1px}
+        /* Left decorative panel */
+        .auth-left{
+            flex:1;
+            background:linear-gradient(160deg,#1a1a1a 0%,#111 100%);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:60px 40px;
+            position:relative;
+            overflow:hidden;
+        }
+        .auth-left::before{
+            content:'';position:absolute;top:-80px;left:-80px;
+            width:400px;height:400px;border-radius:50%;
+            background:radial-gradient(circle,rgba(247,223,121,.12) 0%,transparent 70%);
+        }
+        .auth-left::after{
+            content:'';position:absolute;bottom:-100px;right:-60px;
+            width:300px;height:300px;border-radius:50%;
+            background:radial-gradient(circle,rgba(247,223,121,.07) 0%,transparent 70%);
+        }
+        .auth-left-content{position:relative;z-index:1;text-align:center;max-width:340px;}
+        .auth-brand-icon{
+            width:72px;height:72px;border-radius:20px;
+            background:linear-gradient(135deg,var(--y1),var(--yd));
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 24px;
+            box-shadow:0 12px 30px rgba(199,168,0,.3);
+        }
+        .auth-brand-name{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+        .auth-brand-sub{font-size:.9rem;color:#71717a;line-height:1.6;}
+        .auth-features{margin-top:40px;display:flex;flex-direction:column;gap:14px;text-align:left;}
+        .auth-feature{display:flex;align-items:center;gap:12px;color:#a1a1aa;font-size:.85rem;}
+        .auth-feature-dot{width:28px;height:28px;border-radius:8px;background:rgba(247,223,121,.1);border:1px solid rgba(247,223,121,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--y1);}
 
-        /* Heading */
-        .login-title{font-size:26px;font-weight:900;color:#111827;margin-bottom:6px}
-        .login-sub{font-size:14px;color:#9ca3af;font-weight:500;margin-bottom:32px}
+        /* Right form panel */
+        .auth-right{
+            width:460px;
+            background:#fff;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:50px 48px;
+            position:relative;
+        }
+        @media(max-width:768px){
+            .auth-left{display:none;}
+            .auth-right{width:100%;padding:40px 28px;}
+        }
 
-        /* Fields */
-        .field{margin-bottom:16px}
-        .field label{display:block;font-size:11px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
-        .field input{width:100%;height:46px;border:1.5px solid #e5e7eb;border-radius:12px;padding:0 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;color:#111827;background:#f9fafb;transition:all .2s}
-        .field input:focus{border-color:#F7DF79;background:#fff;box-shadow:0 0 0 3px rgba(247,223,121,.2)}
+        .form-header{width:100%;margin-bottom:32px;}
+        .form-header h2{font-size:1.6rem;font-weight:800;color:#0f172a;letter-spacing:-.02em;margin-bottom:6px;}
+        .form-header p{font-size:.875rem;color:#64748b;}
 
-        /* Remember row */
-        .remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-        .remember-label{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;font-weight:500;cursor:pointer}
-        .remember-label input[type=checkbox]{width:16px;height:16px;accent-color:#F7DF79;cursor:pointer}
+        /* Type selector */
+        .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;width:100%;}
+        .type-btn{
+            padding:14px 12px;border:1.5px solid #e2e8f0;border-radius:14px;
+            background:#fff;cursor:pointer;transition:.2s;
+            display:flex;flex-direction:column;align-items:center;gap:7px;
+        }
+        .type-btn:hover{border-color:var(--yd);background:var(--ybg);}
+        .type-btn.active{border-color:var(--yd);background:var(--ybg);box-shadow:0 0 0 3px rgba(199,168,0,.12);}
+        .type-btn-icon{width:36px;height:36px;border-radius:10px;background:#f4f4f5;display:flex;align-items:center;justify-content:center;color:#52525b;transition:.2s;}
+        .type-btn.active .type-btn-icon{background:var(--y2);color:var(--yk);}
+        .type-btn-label{font-size:.78rem;font-weight:700;color:#374151;}
+        .type-btn.active .type-btn-label{color:var(--yk);}
 
-        /* Button */
-        .btn-login{width:100%;height:48px;border:none;border-radius:12px;background:#F7DF79;color:#111827;font-size:14px;font-weight:900;letter-spacing:.06em;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;box-shadow:0 4px 14px rgba(247,223,121,.4)}
-        .btn-login:hover{background:#fde047;transform:translateY(-1px);box-shadow:0 6px 20px rgba(247,223,121,.5)}
-        .btn-login:active{transform:scale(.98)}
+        /* Form */
+        .login-form{width:100%;display:none;}
+        .login-form.visible{display:block;animation:fadeUp .3s ease-out;}
 
-        /* Error & Success */
-        .err-box{background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:13px;color:#dc2626;font-weight:600}
-        .succ-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:13px;color:#16a34a;font-weight:600}
+        .f-group{margin-bottom:18px;}
+        .f-label{display:block;font-size:.82rem;font-weight:700;color:#334155;margin-bottom:7px;}
+        .f-input{
+            width:100%;padding:11px 14px;
+            border:1.5px solid #e2e8f0;border-radius:11px;
+            font-family:'Outfit',sans-serif;font-size:.9rem;color:#18181b;
+            outline:none;transition:.2s;background:#fff;
+        }
+        .f-input:focus{border-color:var(--yd);box-shadow:0 0 0 3px rgba(199,168,0,.12);}
+        .pw-wrap{position:relative;}
+        .pw-wrap .f-input{padding-right:44px;}
+        .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center;padding:4px;}
+        .pw-toggle:hover{color:#52525b;}
 
-        /* Right panel */
-        .right{width:420px;flex-shrink:0;background:#111827;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;min-height:100vh}
-        .right-content{text-align:center}
-        .right-icon{width:80px;height:80px;background:rgba(247,223,121,.15);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px}
-        .right-icon svg{width:40px;height:40px;color:#F7DF79}
-        .right-title{font-size:24px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.3}
-        .right-sub{font-size:14px;color:rgba(255,255,255,.4);font-weight:500;line-height:1.6;margin-bottom:36px}
-        .feature-list{display:flex;flex-direction:column;gap:14px;text-align:left}
-        .feature-item{display:flex;align-items:center;gap:12px}
-        .feature-dot{width:32px;height:32px;background:rgba(247,223,121,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .feature-dot svg{width:16px;height:16px;color:#F7DF79}
-        .feature-text{font-size:13px;color:rgba(255,255,255,.6);font-weight:500}
+        .btn-login{
+            width:100%;padding:13px;
+            background:linear-gradient(135deg,var(--y1),var(--yd));
+            border:none;border-radius:11px;
+            color:#18181b;font-size:.95rem;font-weight:700;
+            cursor:pointer;font-family:'Outfit',sans-serif;
+            box-shadow:0 4px 14px rgba(199,168,0,.3);
+            transition:.2s;margin-top:6px;
+        }
+        .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(199,168,0,.4);}
 
-        @media(max-width:768px){.right{display:none}.left{padding:24px}}
+        .error-box{
+            background:#fef2f2;border:1.5px solid #fecaca;
+            border-radius:10px;padding:11px 14px;
+            margin-bottom:20px;color:#dc2626;
+            font-size:.83rem;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+        }
+
+        .form-footer{margin-top:20px;text-align:center;}
+        .form-footer a{font-size:.82rem;color:#64748b;text-decoration:none;font-weight:600;}
+        .form-footer a:hover{color:#18181b;}
+
+        .auth-footer{position:absolute;bottom:20px;font-size:.72rem;color:#94a3b8;font-weight:500;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     </style>
 </head>
 <body>
-    <div class="left">
-        <div class="login-box">
-            <!-- Logo -->
-            <div class="logo">
-                <div class="logo-mark">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                </div>
-                <div>
-                    <div class="logo-name">The Crimpers</div>
-                    <div class="logo-sub">Salon Management</div>
-                </div>
+
+    {{-- Left Panel --}}
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="auth-brand-icon">
+                <svg width="36" height="36" fill="none" stroke="#18181b" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 21a9 9 0 110-18 9 9 0 010 18z"/><path d="M12 8v4l3 3"/></svg>
             </div>
+            <div class="auth-brand-name">The Crimpers</div>
+            <div class="auth-brand-sub">Professional salon management system for modern businesses.</div>
 
-            <h1 class="login-title">Welcome back</h1>
-            <p class="login-sub">Sign in to your account to continue</p>
-
-            @if(session('status'))
-            <div class="succ-box">{!! session('status') !!}</div>
-            @endif
-
-            @if($errors->any())
-            <div class="err-box">{{ $errors->first() }}</div>
-            @endif
-
-            <form method="POST" action="{{ route('login.attempt') }}">
-                @csrf
-                <div class="field">
-                    <label>Email Address</label>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required autofocus>
-                </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input type="password" name="password" id="login-password" placeholder="••••••••" required>
-                </div>
-                <div class="remember-row">
-                    <label class="remember-label">
-                        <input type="checkbox" onchange="document.getElementById('login-password').type = this.checked ? 'text' : 'password'">
-                        Show password
-                    </label>
-                    <a href="{{ route('password.request') }}" style="font-size:13px; color:#111827; font-weight:700; text-decoration:none; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Forgot Password?</a>
-                </div>
-                <button type="submit" class="btn-login">SIGN IN</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="right">
-        <div class="right-content">
-            <div class="right-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 3 6 6 6-6"/><path d="M20 21H4"/><path d="m6 21 6-6 6 6"/></svg>
-            </div>
-            <h2 class="right-title">Manage your salon<br>with confidence</h2>
-            <p class="right-sub">Everything you need to run a professional salon — billing, staff, inventory and more.</p>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <div class="feature-dot">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-dot">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <span class="feature-text">Fast POS terminal for quick billing</span>
+                    POS Terminal & Invoicing
                 </div>
-                <div class="feature-item">
-                    <div class="feature-dot">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <span class="feature-text">Real-time sales analytics & reports</span>
+                    Staff & Attendance Management
                 </div>
-                <div class="feature-item">
-                    <div class="feature-dot">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <span class="feature-text">Staff & customer management</span>
+                    Inventory & Product Control
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    Appointments & Bookings
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- Right Form Panel --}}
+    <div class="auth-right">
+        <div class="form-header">
+            <h2>Welcome back</h2>
+            <p>Sign in to your admin account to continue</p>
+        </div>
+
+        @if($errors->any())
+        <div class="error-box" style="width:100%;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ $errors->first() }}
+        </div>
+        @endif
+
+        <form action="{{ route('login') }}" method="POST" id="loginForm" style="width:100%">
+            @csrf
+            <input type="hidden" name="type" value="admin">
+
+            <div class="f-group">
+                <label class="f-label">Email Address</label>
+                <input type="email" name="email" value="{{ old('email') }}" required class="f-input" placeholder="your@email.com" autofocus>
+            </div>
+
+            <div class="f-group">
+                <label class="f-label">Password</label>
+                <div class="pw-wrap">
+                    <input type="password" name="password" id="password" required class="f-input" placeholder="••••••••">
+                    <button type="button" class="pw-toggle" onclick="togglePassword()">
+                        <svg id="eye-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+        <div class="form-footer" style="width:100%;margin-top:16px">
+            <a href="{{ route('password.request') }}">Forgot your password?</a>
+        </div>
+
+        <div class="auth-footer">Powered by The Crimpers</div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pass = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+            if (pass.type === 'password') {
+                pass.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                pass.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    </script>
 </body>
 </html>
