@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Delete the old admin user to ensure only the new one works
+        User::where('email', 'safullahzafar@gmail.com')->delete();
+
+        // Create or update the new admin user
         User::updateOrCreate(
             ['email' => 'Sa40560@gmail.com'],
             [
