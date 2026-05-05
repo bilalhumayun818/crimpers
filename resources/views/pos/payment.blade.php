@@ -518,7 +518,7 @@
               window.location.href = '{{ route("pos.index") }}';
             }, 4000);
           };
-          iframe.src = `/invoices/${data.invoice.id}/ticket`;
+          iframe.src = `{{ url('/invoices') }}/${data.invoice.id}/ticket`;
         } else {
           // Fallback if iframe is missing
           setTimeout(() => {
