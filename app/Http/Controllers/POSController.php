@@ -153,7 +153,7 @@ class POSController extends Controller
                             'ItemCode' => (string) $item['id'],
                             'ItemName' => $item['name'] ?? 'Unknown Item',
                             'Quantity' => round($quantity, 2),
-                            'PCTCode' => "11001010", // Services class code
+                            'PCTCode' => "00000000", // Services class code
                             'TaxRate' => 5.0, // Fixed strictly to 5% GST on all products/services
                             'SaleValue' => round($price, 2),
                             'Discount' => 0.0,

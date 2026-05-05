@@ -210,7 +210,7 @@
             <div class="header-info">Shop no. 5, Sargodha Rd, inside Pearl City Plaza, Canal Block Shadman Town,
                 Faisalabad</div>
             <div class="header-info">Phone: 0300 7614788</div>
-            <div class="header-info">NTN: 4401860-3 &nbsp; PNTN: 110044018603</div>
+            <div class="header-info">PNTN: 5209042-4</div>
         </div>
 
         <!-- Metadata -->
