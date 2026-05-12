@@ -287,7 +287,13 @@
                                 {{ ucfirst($invoice->payment_method ?? 'Cash') }}
                             </div>
                         </td>
-                        <td><span class="inv-amount">PKR {{ number_format($invoice->payable_amount, 0) }}</span></td>
+                        <td>
+                            <span class="inv-amount">PKR {{ number_format($invoice->payable_amount, 0) }}</span>
+                            <div style="font-size: 10px; color: #9ca3af; margin-top: 2px; font-weight: 500;">
+                                Rec: {{ number_format($invoice->tendered_amount ?? $invoice->payable_amount, 0) }} | 
+                                Ret: {{ number_format(max(0, ($invoice->tendered_amount ?? $invoice->payable_amount) - $invoice->payable_amount), 0) }}
+                            </div>
+                        </td>
                         <td>
                             @if($invoice->fbrLog)
                                 <button class="fbr-badge fbr-{{ $invoice->fbrLog->status }}">{{ ucfirst($invoice->fbrLog->status) }}</button>

@@ -151,7 +151,12 @@
                         <span class="hd-total-label">Total Paid</span>
                         <span class="hd-total-val">PKR {{ number_format($invoice->payable_amount, 0) }}</span>
                     </div>
-                    <div class="hd-pay-row"><span>Method</span><span>{{ $invoice->payment_method ?? 'Cash' }}</span></div>
+                    @php
+                        $tendered = $invoice->tendered_amount ?? $invoice->payable_amount;
+                        $change = max(0, $tendered - $invoice->payable_amount);
+                    @endphp
+                    <div class="hd-pay-row"><span>Amount Received</span><span>PKR {{ number_format($tendered, 0) }}</span></div>
+                    <div class="hd-pay-row"><span>Change Given</span><span>PKR {{ number_format($change, 0) }}</span></div>
                     <div class="hd-pay-row"><span>Status</span><span><span class="hd-paid-badge">✓ Paid</span></span></div>
                 </div>
             </div>

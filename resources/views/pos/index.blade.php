@@ -647,12 +647,21 @@
       height: 11px
     }
 
-    .qty-num {
+    .qty-num-input {
       font-size: 12px;
       font-weight: 900;
       color: #111827;
-      min-width: 16px;
-      text-align: center
+      width: 32px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .qty-num-input::-webkit-outer-spin-button,
+    .qty-num-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     /* Footer */
@@ -1366,6 +1375,15 @@
       if (cart[idx].quantity < 1) cart.splice(idx, 1);
       renderCart();
     }
+    function manualUpdateQty(idx, val) {
+      const n = parseInt(val);
+      if (isNaN(n) || n < 1) {
+        cart.splice(idx, 1);
+      } else {
+        cart[idx].quantity = n;
+      }
+      renderCart();
+    }
     function clearCart() {
       cart = []; renderCart();
     }
@@ -1462,9 +1480,12 @@
               <div class="cart-item-price">PKR ${(item.price * item.quantity).toFixed(2)}</div>
             </div>
             <div class="qty-ctrl">
-              <button onclick="updateQty(${i},-1)" class="qty-btn"><i data-lucide="minus" style="width:11px;height:11px"></i></button>
-              <span class="qty-num">${item.quantity}</span>
-              <button onclick="updateQty(${i},1)" class="qty-btn"><i data-lucide="plus" style="width:11px;height:11px"></i></button>
+              <button onclick="updateQty(${i},-1)" class="qty-btn"><i data-lucide="minus"></i></button>
+              <input type="number" class="qty-num-input" value="${item.quantity}" min="1" 
+                onchange="manualUpdateQty(${i}, this.value)"
+                onkeyup="if(event.key==='Enter') this.blur()"
+                onclick="event.stopPropagation()">
+              <button onclick="updateQty(${i},1)" class="qty-btn"><i data-lucide="plus"></i></button>
             </div>
           </div>`).join('');
         btn.disabled = false;

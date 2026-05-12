@@ -341,7 +341,15 @@
           <div id="cash-panel" class="panel">
             <div class="panel-row"><label style="font-size:12px;font-weight:700;color:#475569">Cash Tendered</label><input
                 id="cash-tendered" type="number" placeholder="0.00" oninput="updateCashChange()"></div>
-            <div id="cash-change" class="panel-note" style="color:#16a34a">Change: PKR 0.00</div>
+            <div id="cash-status" class="panel-note" style="color:#64748b; font-size: 10px; margin-bottom: 2px;">Received: PKR 0.00</div>
+            <div id="cash-change" class="panel-note" style="color:#16a34a; font-size: 13px; margin-top: 0;">Change: PKR 0.00</div>
+          </div>
+
+          <div id="card-panel" class="panel" style="display:none">
+            <div class="panel-row"><label style="font-size:12px;font-weight:700;color:#475569">Card Amount</label><input
+                id="card-tendered" type="number" placeholder="0.00" oninput="updateCardChange()"></div>
+            <div id="card-status" class="panel-note" style="color:#64748b; font-size: 10px; margin-bottom: 2px;">Received: PKR 0.00</div>
+            <div id="card-change" class="panel-note" style="color:#16a34a; font-size: 13px; margin-top: 0;">Change: PKR 0.00</div>
           </div>
 
           <div id="split-panel" class="panel" style="display:none">
@@ -350,7 +358,8 @@
             <div class="panel-row" style="margin-top:8px"><label
                 style="font-size:12px;font-weight:700;color:#475569">Card</label><input id="split-card" type="number"
                 placeholder="0.00" oninput="updateSplitRemaining()"></div>
-            <div id="split-remaining" class="panel-note" style="color:#ef4444">Remaining: PKR 0.00</div>
+            <div id="split-status" class="panel-note" style="color:#64748b; font-size: 10px; margin-bottom: 2px;">Received: PKR 0.00</div>
+            <div id="split-remaining" class="panel-note" style="color:#ef4444; font-size: 13px; margin-top: 0;">Remaining: PKR 0.00</div>
           </div>
 
           <button id="checkout-btn" class="checkout-btn" onclick="checkout()">PROCEED TO CHECKOUT</button>
@@ -414,6 +423,7 @@
       document.getElementById('label-discount').innerText = `-PKR ${disc.toFixed(2)}`;
       document.getElementById('label-total').innerText = `PKR ${total.toFixed(2)}`;
       if (paymentMethod === 'cash') updateCashChange();
+      if (paymentMethod === 'card') updateCardChange();
       if (paymentMethod === 'split') updateSplitRemaining();
     }
 
@@ -421,8 +431,10 @@
       paymentMethod = method;
       document.querySelectorAll('.m-btn').forEach(b => b.classList.toggle('active', b.dataset.method === method));
       document.getElementById('cash-panel').style.display = method === 'cash' ? 'block' : 'none';
+      document.getElementById('card-panel').style.display = method === 'card' ? 'block' : 'none';
       document.getElementById('split-panel').style.display = method === 'split' ? 'block' : 'none';
       if (method === 'cash') updateCashChange();
+      if (method === 'card') updateCardChange();
       if (method === 'split') updateSplitRemaining();
     }
 
@@ -436,12 +448,28 @@
       const total = getTotal();
       const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
       const change = tendered - total;
+      document.getElementById('cash-status').innerText = `Total Received: PKR ${tendered.toFixed(2)}`;
       const el = document.getElementById('cash-change');
       if (change >= 0) {
-        el.innerText = `Change: PKR ${change.toFixed(2)}`;
+        el.innerText = `Change To Give: PKR ${change.toFixed(2)}`;
         el.style.color = '#16a34a';
       } else {
-        el.innerText = `Need: PKR ${Math.abs(change).toFixed(2)}`;
+        el.innerText = `Amount Needed: PKR ${Math.abs(change).toFixed(2)}`;
+        el.style.color = '#ef4444';
+      }
+    }
+
+    function updateCardChange() {
+      const total = getTotal();
+      const tendered = parseFloat(document.getElementById('card-tendered').value) || 0;
+      const change = tendered - total;
+      document.getElementById('card-status').innerText = `Total Received: PKR ${tendered.toFixed(2)}`;
+      const el = document.getElementById('card-change');
+      if (change >= 0) {
+        el.innerText = `Change To Give: PKR ${change.toFixed(2)}`;
+        el.style.color = '#16a34a';
+      } else {
+        el.innerText = `Amount Needed: PKR ${Math.abs(change).toFixed(2)}`;
         el.style.color = '#ef4444';
       }
     }
@@ -450,10 +478,17 @@
       const total = getTotal();
       const cash = parseFloat(document.getElementById('split-cash').value) || 0;
       const card = parseFloat(document.getElementById('split-card').value) || 0;
-      const rem = total - cash - card;
+      const received = cash + card;
+      const diff = received - total;
+      document.getElementById('split-status').innerText = `Total Received: PKR ${received.toFixed(2)}`;
       const el = document.getElementById('split-remaining');
-      el.innerText = rem <= 0.001 ? `Fully Paid (PKR ${total.toFixed(2)})` : `Remaining: PKR ${rem.toFixed(2)}`;
-      el.style.color = rem <= 0.001 ? '#16a34a' : '#ef4444';
+      if (diff >= 0) {
+        el.innerText = `Change To Give: PKR ${diff.toFixed(2)}`;
+        el.style.color = '#16a34a';
+      } else {
+        el.innerText = `Amount Needed: PKR ${Math.abs(diff).toFixed(2)}`;
+        el.style.color = '#ef4444';
+      }
     }
 
     async function checkout() {
@@ -466,14 +501,21 @@
         const splitCash = parseFloat(document.getElementById('split-cash').value) || 0;
         const splitCard = parseFloat(document.getElementById('split-card').value) || 0;
         if (splitCash + splitCard < total - 0.01) {
-          showAppMessage('Split amounts must cover the total amount.', 'error');
+          alert('Split amounts must cover the total amount.');
           return;
         }
       }
       if (paymentMethod === 'cash') {
         const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
         if (tendered < total - 0.01) {
-          showAppMessage('Insufficient cash tendered.', 'error');
+          alert('Insufficient cash tendered.');
+          return;
+        }
+      }
+      if (paymentMethod === 'card') {
+        const tendered = parseFloat(document.getElementById('card-tendered').value) || 0;
+        if (tendered < total - 0.01) {
+          alert('Insufficient card amount specified.');
           return;
         }
       }
@@ -484,6 +526,7 @@
       const customer = document.getElementById('customer-name').value.trim() || 'Walk-in Customer';
       let tenderedAmt = total;
       if (paymentMethod === 'cash') tenderedAmt = parseFloat(document.getElementById('cash-tendered').value) || total;
+      if (paymentMethod === 'card') tenderedAmt = parseFloat(document.getElementById('card-tendered').value) || total;
       if (paymentMethod === 'split') tenderedAmt = parseFloat(document.getElementById('split-cash').value) || 0;
 
       try {
@@ -528,7 +571,7 @@
 
       } catch (e) {
         console.error('Checkout error:', e);
-        showAppMessage(e.message || 'Something went wrong during checkout.', 'error');
+        alert(e.message || 'Something went wrong during checkout.');
         btn.disabled = false;
         btn.innerText = 'PROCEED TO CHECKOUT';
       }

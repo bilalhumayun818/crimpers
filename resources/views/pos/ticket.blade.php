@@ -309,16 +309,16 @@
 
             <div style="display: flex; flex-direction: column; align-items: flex-end; font-weight: bold; font-size: 12px; line-height: 1.2;">
                 <div style="display: flex; gap: 8px; margin-bottom: 1px;">
-                    <span>Cash Tendered:</span>
-                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->received_amount ?? $invoice->payable_amount, 2) }}</span>
+                    <span>Amount Received:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->tendered_amount ?? $invoice->payable_amount, 2) }}</span>
                 </div>
                 <div style="display: flex; gap: 8px; font-weight: normal; font-size: 11px; margin-bottom: 1px;">
                     <span>Amount Charged:</span>
                     <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->payable_amount, 2) }}</span>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <span>Balance:</span>
-                    <span style="min-width: 70px; text-align: right;">{{ number_format($invoice->change_amount ?? 0, 2) }}</span>
+                    <span>Balance/Change:</span>
+                    <span style="min-width: 70px; text-align: right;">{{ number_format(max(0, ($invoice->tendered_amount ?? $invoice->payable_amount) - $invoice->payable_amount), 2) }}</span>
                 </div>
             </div>
         </div>
