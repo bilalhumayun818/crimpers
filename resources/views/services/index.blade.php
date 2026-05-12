@@ -276,7 +276,7 @@
         const og = btn.innerText; btn.innerText = 'Saving...'; btn.disabled = true;
 
         try {
-            const res = await fetch(`/categories/${currentCategory}`, {
+            const res = await fetch(`{{ url('categories') }}/${currentCategory}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -307,7 +307,7 @@
         const og = btn.innerText; btn.innerText = 'Deleting...'; btn.disabled = true;
 
         try {
-            const res = await fetch(`/categories/${currentCategory}`, {
+            const res = await fetch(`{{ url('categories') }}/${currentCategory}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
