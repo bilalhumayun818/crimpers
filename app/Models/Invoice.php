@@ -24,6 +24,8 @@ class Invoice extends Model
         'payment_method',
         'status',
         'tendered_amount',
+        'buyer_pntn',
+        'buyer_cnic',
     ];
 
     public function user()

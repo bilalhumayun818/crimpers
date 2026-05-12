@@ -167,7 +167,7 @@
         }
 
         .fbr-logo {
-            width: 90px;
+            width: 120px;
         }
 
         .qr-code {
@@ -229,6 +229,16 @@
                 <span>Customer:
                     {{ strtoupper($invoice->customer_name ?: ($invoice->customer->name ?? 'CASH SALES-WALKING CUSTOMER A/C')) }}</span>
             </div>
+            @if($invoice->buyer_pntn)
+            <div class="meta-row">
+                <span>Buyer PNTN: {{ $invoice->buyer_pntn }}</span>
+            </div>
+            @endif
+            @if($invoice->buyer_cnic)
+            <div class="meta-row">
+                <span>Buyer CNIC: {{ $invoice->buyer_cnic }}</span>
+            </div>
+            @endif
             @if($invoice->remarks)
                 <div class="meta-row">
                     <span>Remarks: {{ $invoice->remarks }}</span>
@@ -343,11 +353,11 @@
 
             <div class="fbr-footer-layout">
                 <div class="text-left">
-                    <img src="{{ asset('img/fbr-pos-logo.png') }}" alt="FBR POS Logo" class="fbr-logo"
-                        style="filter: grayscale(1) invert(1) contrast(1.5);">
-                    <div
+                    <img src="{{ asset('img/pra-pos-logo.png') }}" alt="FBR POS Logo" class="fbr-logo"
+                        style=" contrast(1.5);">
+                    <!-- <div
                         style="font-size: 8px; font-weight: 900; text-align: center; margin-top: -2px; letter-spacing: 0.3px;">
-                        INVOICING SYSTEM</div>
+                        INVOICING SYSTEM</div> -->
                 </div>
 
                 @php

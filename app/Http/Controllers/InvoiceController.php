@@ -6,10 +6,110 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Invoice;
+use App\Models\FbrLog;
+use App\Models\Customer;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
 {
+    public function resendFbr(Invoice $invoice)
+    {
+        try {
+            $invoice->load(['items.itemizable', 'customer']);
+            
+            // --- FBR Integration Preparation (Same as POSController) ---
+            $totalTax = $invoice->tax ?? 0;
+            $totalItems = $invoice->items->count();
+            $taxPerItem = $totalItems > 0 ? round($totalTax / $totalItems, 2) : 0;
+
+            $buyerName = $invoice->customer_name ?: ($invoice->customer ? $invoice->customer->name : 'Walk-in Customer');
+            $buyerPhone = $invoice->customer ? $invoice->customer->phone : '0000-0000000';
+            
+            $posServiceFee = 1.00;
+            $finalPayable = (float) $invoice->payable_amount + $posServiceFee;
+
+            $fbrPayload = [
+                'InvoiceNumber' => "",
+                'POSID' => (int) env('FBR_POS_ID'),
+                'USIN' => $invoice->invoice_no,
+                'DateTime' => $invoice->created_at->format('Y-m-d H:i:s'),
+                'BuyerName' => $buyerName,
+                'BuyerPhoneNumber' => $buyerPhone,
+                'BuyerPNTN' => $invoice->buyer_pntn ?? "",
+                'BuyerCNIC' => $invoice->buyer_cnic ?? "",
+                'TotalBillAmount' => round($finalPayable, 2),
+                'TotalQuantity' => round((float) $invoice->items->sum('quantity'), 2),
+                'TotalSaleValue' => round((float) $invoice->total_amount, 2),
+                'TotalTaxCharged' => round((float) $totalTax, 2),
+                'Discount' => round((float) ($invoice->discount ?? 0.0), 2),
+                'FurtherTax' => round($posServiceFee, 2),
+                'PaymentMode' => $invoice->payment_method == 'cash' ? 1 : 2,
+                'InvoiceType' => 1,
+                'RefUSIN' => null,
+                'Items' => $invoice->items->map(function ($item) use ($taxPerItem) {
+                    $price = (float) ($item->price ?? 0.0);
+                    $quantity = (float) ($item->quantity ?? 0.0);
+                    $subtotal = (float) ($item->subtotal ?? ($price * $quantity));
+
+                    return [
+                        'ItemCode' => (string) $item->itemizable_id,
+                        'ItemName' => $item->itemizable->name ?? 'Unknown Item',
+                        'Quantity' => round($quantity, 2),
+                        'PCTCode' => "00000000",
+                        'TaxRate' => 5.0,
+                        'SaleValue' => round($price, 2),
+                        'Discount' => 0.0,
+                        'TaxCharged' => round((float) $taxPerItem, 2),
+                        'TotalAmount' => round((float) ($subtotal + $taxPerItem), 2),
+                        'FurtherTax' => 0.0,
+                        'InvoiceType' => 1,
+                        'RefUSIN' => null
+                    ];
+                })->toArray(),
+            ];
+
+            $fbrResponse = Http::withoutVerifying()->withHeaders([
+                'Authorization' => 'Bearer ' . env('FBR_AUTH_CODE'),
+                'Content-Type' => 'application/json'
+            ])->timeout(15)->post(env('FBR_API_URL'), $fbrPayload);
+
+            $resData = $fbrResponse->json();
+            $isSuccess = isset($resData['Code']) && $resData['Code'] == '100';
+
+            // Delete old log if exists to keep it clean or just update
+            FbrLog::updateOrCreate(
+                ['invoice_id' => $invoice->id],
+                [
+                    'invoice_no' => $invoice->invoice_no,
+                    'payload' => $fbrPayload,
+                    'status' => $isSuccess ? 'success' : 'failed',
+                    'response' => $resData,
+                ]
+            );
+
+            if ($isSuccess) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'FBR Sync Successful: ' . ($resData['InvoiceNumber'] ?? ''),
+                    'invoice_number' => $resData['InvoiceNumber'] ?? null
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'FBR Sync Failed: ' . ($resData['Response'] ?? 'Unknown Error')
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Exception: ' . $e->getMessage()
+            ]);
+        }
+    }
     public function index(Request $request)
     {
         $query = Invoice::with(['customer', 'user', 'fbrLog']);

@@ -277,14 +277,17 @@
 
         try {
             const res = await fetch(`/categories/${currentCategory}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ name: newName })
+                body: JSON.stringify({ 
+                    name: newName,
+                    _method: 'PUT'
+                })
             });
             const data = await res.json();
             if (data.success) {
@@ -305,13 +308,16 @@
 
         try {
             const res = await fetch(`/categories/${currentCategory}`, {
-                method: 'DELETE',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                }
+                },
+                body: JSON.stringify({
+                    _method: 'DELETE'
+                })
             });
             const data = await res.json();
             if (data.success) {

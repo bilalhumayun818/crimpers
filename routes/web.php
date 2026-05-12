@@ -68,6 +68,7 @@ Route::middleware(['web', 'auth', 'session.active'])->group(function () {
     Route::get('/invoices/{invoice}/ticket', [InvoiceController::class, 'ticket'])->name('invoices.ticket');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/sales-history/{invoice}', [InvoiceController::class, 'historyShow'])->name('sales-history.show');
+    Route::post('/invoices/{invoice}/resend-fbr', [InvoiceController::class, 'resendFbr'])->name('invoices.resend-fbr');
 
     // FBR Integration Testing
     Route::get('/fbr-integration', [FbrController::class, 'index'])->name('fbr.index');

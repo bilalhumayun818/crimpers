@@ -49,6 +49,8 @@ class POSController extends Controller
                 'customer_name' => 'nullable|string|max:255',
                 'discount' => 'nullable|numeric',
                 'tendered_amount' => 'nullable|numeric',
+                'buyer_pntn' => 'nullable|string|max:50',
+                'buyer_cnic' => 'nullable|string|max:20',
             ]);
 
             return DB::transaction(function () use ($request) {
@@ -64,6 +66,8 @@ class POSController extends Controller
                     'payment_method' => $request->payment_method,
                     'tendered_amount' => $request->tendered_amount ?? $request->payable_amount,
                     'status' => 'paid',
+                    'buyer_pntn' => $request->buyer_pntn,
+                    'buyer_cnic' => $request->buyer_cnic,
                 ]);
 
                 foreach ($request->items as $item) {
@@ -129,13 +133,14 @@ class POSController extends Controller
                 $finalPayable = (float) $request->payable_amount + $posServiceFee;
 
                 $fbrPayload = [
-                    'InvoiceNumber' => $invoice->invoice_no,
-                    'POSID' => (int) env('FBR_POS_ID', 819568),
-                    'USIN' => 'USIN-' . strtoupper(Str::random(10)),
+                    'InvoiceNumber' => "",
+                    'POSID' => (int) env('FBR_POS_ID'),
+                    'USIN' => $invoice->invoice_no,
                     'DateTime' => now()->format('Y-m-d H:i:s'),
                     'BuyerName' => $buyerName,
                     'BuyerPhoneNumber' => $buyerPhone,
-                    'BuyerNTN' => "",
+                    'BuyerPNTN' => $request->buyer_pntn ?? "",
+                    'BuyerCNIC' => $request->buyer_cnic ?? "",
                     'TotalBillAmount' => round($finalPayable, 2),
                     'TotalQuantity' => round((float) collect($request->items)->sum('quantity'), 2),
                     'TotalSaleValue' => round((float) $request->total_amount, 2),
@@ -169,9 +174,9 @@ class POSController extends Controller
                 // --- LIVE FBR API Call ---
                 try {
                     $fbrResponse = Http::withoutVerifying()->withHeaders([
-                        'Authorization' => 'Bearer ' . env('FBR_AUTH_CODE', '1298b5eb-b252-3d97-8622-a4a69d5bf818'),
+                        'Authorization' => 'Bearer ' . env('FBR_AUTH_CODE'),
                         'Content-Type' => 'application/json'
-                    ])->timeout(15)->post(env('FBR_API_URL', 'https://esp.fbr.gov.pk:8244/FBR/v1/api/Live/PostData'), $fbrPayload);
+                    ])->timeout(15)->post(env('FBR_API_URL'), $fbrPayload);
 
                     $resData = $fbrResponse->json();
                     $isSuccess = isset($resData['Code']) && $resData['Code'] == '100';

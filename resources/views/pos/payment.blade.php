@@ -304,6 +304,16 @@
             <label>Customer Name</label>
             <input id="customer-name" type="text" placeholder="Walk-in Customer">
           </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="field">
+              <label>Buyer PNTN (Optional)</label>
+              <input id="buyer-pntn" type="text" placeholder="NTN Number">
+            </div>
+            <div class="field">
+              <label>Buyer CNIC (Optional)</label>
+              <input id="buyer-cnic" type="text" placeholder="CNIC Number">
+            </div>
+          </div>
           <div id="order-items" class="items"></div>
         </div>
       </div>
@@ -542,7 +552,9 @@
             payable_amount: total,
             tendered_amount: tenderedAmt,
             customer_id: null,
-            customer_name: customer
+            customer_name: customer,
+            buyer_pntn: document.getElementById('buyer-pntn').value.trim() || null,
+            buyer_cnic: document.getElementById('buyer-cnic').value.trim() || null
           })
         });
         const data = await res.json();

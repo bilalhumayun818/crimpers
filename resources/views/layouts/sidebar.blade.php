@@ -92,10 +92,10 @@
             <span>Sale History</span>
         </a>
 
-        <!-- <a href="{{ route('fbr.index') }}" class="sb-item {{ request()->routeIs('fbr.index') ? 'active' : '' }}">
+        <a href="{{ route('fbr.index') }}" class="sb-item {{ request()->routeIs('fbr.index') ? 'active' : '' }}">
             <i data-lucide="shield-check"></i>
             <span>FBR Integration</span>
-        </a> -->
+        </a>
 
     </nav>
 

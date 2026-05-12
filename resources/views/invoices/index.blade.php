@@ -67,7 +67,7 @@
 .inv-table{width:100%;border-collapse:collapse}
 .inv-table thead tr{background:#f9fafb;border-bottom:1px solid #f1f1f1}
 .inv-table th{padding:11px 18px;font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;text-align:left;white-space:nowrap}
-.inv-table th:last-child{text-align:right}
+.inv-table th:last-child{text-align:center}
 .inv-table tbody tr{border-bottom:1px solid #f9fafb;transition:background .15s}
 .inv-table tbody tr:last-child{border-bottom:none}
 .inv-table tbody tr:hover{background:#fafafa}
@@ -259,7 +259,7 @@
                         <th>Payment</th>
                         <th>Amount</th>
                         <th>FBR</th>
-                        <th style="text-align:center">Actions</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="inv-tbody">
@@ -303,9 +303,17 @@
                         </td>
                         <td>
                             <div class="row-actions">
-                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" title="View History">
-                                    View History
+                                <a href="{{ route('sales-history.show', $invoice) }}" class="row-btn view" title="View Details">
+                                    <i data-lucide="file-text" style="width:14px;height:14px"></i>
                                 </a>
+                                <button onclick="printTicket('{{ $invoice->id }}')" class="row-btn print" title="Print Receipt">
+                                    <i data-lucide="printer" style="width:14px;height:14px"></i>
+                                </button>
+                                @if(!$invoice->fbrLog || $invoice->fbrLog->status !== 'success')
+                                    <button onclick="resendFbr('{{ $invoice->id }}', this)" class="row-btn" style="background:#fef2f2;color:#ef4444" title="Resend to FBR">
+                                        <i data-lucide="refresh-cw" style="width:14px;height:14px"></i>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -342,9 +350,12 @@
 
 @php
     $fbrData = $invoices->filter(fn($i) => $i->fbrLog)->mapWithKeys(fn($i) => [
-        $i->fbrLog->id => ["invoice_no"=>$i->invoice_no,"payload"=>$i->fbrLog->payload,"response"=>$i->fbrLog->response]
+        $i->fbrLog->id => ["invoice_no"=>$i->invoice_no, "payload"=>$i->fbrLog->payload, "response"=>$i->fbrLog->response]
     ])->toJson();
 @endphp
+
+{{-- Hidden iframe for printing --}}
+<iframe id="print-iframe" style="position:absolute;width:0;height:0;border:none;visibility:hidden;"></iframe>
 
 <script>
 const fbrLogs={!! $fbrData !!};
@@ -374,6 +385,43 @@ function syntaxHighlight(json){
         return`<span class="${c}">${m}</span>`;
     });
 }
+
+function printTicket(id) {
+    const iframe = document.getElementById('print-iframe');
+    iframe.src = `{{ url('/invoices') }}/${id}/ticket`;
+}
+
+async function resendFbr(id, btn) {
+    const icon = btn.querySelector('i');
+    if (icon) icon.style.animation = 'spin 1s linear infinite';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`{{ url('/invoices') }}/${id}/resend-fbr`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            alert('Success: ' + data.message);
+            // Print on success as requested
+            printTicket(id);
+            // Reload page after a delay to update status UI
+            setTimeout(() => window.location.reload(), 3000);
+        } else {
+            alert('Failed: ' + data.message);
+            if (icon) icon.style.animation = '';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+        if (icon) icon.style.animation = '';
+        btn.disabled = false;
+    }
+}
+
+document.write('<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>');
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeFbrModal();});
 </script>
 @endsection
