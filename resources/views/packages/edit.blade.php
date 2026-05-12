@@ -243,11 +243,7 @@
                     <div class="delete-zone-body">
                         <div class="delete-zone-title">Delete Package</div>
                         <div class="delete-zone-desc">This will remove the package bundle but keep individual services intact.</div>
-                        <form action="{{ route('packages.destroy', $package) }}" method="POST" onsubmit="return confirm('Delete this package permanently?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-delete">Remove Bundle</button>
-                        </form>
+                        <button type="button" onclick="confirmDelete()" class="btn-delete">Remove Bundle</button>
                     </div>
                 </div>
             </div>
@@ -256,7 +252,18 @@
     </form>
 </div>
 
+{{-- Hidden Delete Form --}}
+<form id="delete-package-form" action="{{ route('packages.destroy', $package) }}" method="POST" style="display:none">
+    @csrf
+    @method('DELETE')
+</form>
+
 <script>
+function confirmDelete() {
+    if (confirm('Delete this package permanently?')) {
+        document.getElementById('delete-package-form').submit();
+    }
+}
 function updateSummary(){
     const checked=document.querySelectorAll('input[name="service_ids[]"]:checked');
     document.getElementById('sum-count').innerText=checked.length;
